@@ -2,15 +2,17 @@ import 'package:sqflite/sqflite.dart';
 
 import 'helper.dart';
 
-class Category {
+class Subcategory {
   int? id;
   String name;
+  int categoryId;
 
-  Category(this.name, {this.id});
+  Subcategory(this.name, this.categoryId, {this.id});
 
   Map<String, Object?> get toMap {
     var map = <String, Object?>{
       'name': name,
+      'category_id': categoryId,
     };
 
     if (id != null) {
@@ -20,10 +22,11 @@ class Category {
     return map;
   }
 
-  factory Category.fromMap(Map<dynamic, dynamic> map) {
-    return Category(
-      map['name'],
+  factory Subcategory.fromMap(Map<dynamic, dynamic> map) {
+    return Subcategory(
       id: map['id'],
+      map['name'],
+      map['category_id'],
     );
   }
 }
@@ -34,7 +37,8 @@ class CategoryProvider {
   static const String tableName = 'category';
   static const Map<String, List<String>> columns = {
     'id': ['integer', 'primary key', 'autoincrement'],
-    'name': ['text', 'not null']
+    'name': ['text', 'not null'],
+    'category_id': ['integer', 'not null']
   };
 
   Future open(String path) async {
@@ -47,12 +51,12 @@ class CategoryProvider {
     );
   }
 
-  Future<Category> insert(Category category) async {
+  Future<Subcategory> insert(Subcategory category) async {
     category.id = await db.insert(tableName, category.toMap);
     return category;
   }
 
-  Future<Category?> getTodo(int id) async {
+  Future<Subcategory?> getTodo(int id) async {
     List<Map> maps = await db.query(
       tableName,
       columns: columns.keys.toList(),
@@ -62,7 +66,7 @@ class CategoryProvider {
 
     if (maps.isEmpty) return null;
 
-    return Category.fromMap(maps.first);
+    return Subcategory.fromMap(maps.first);
   }
 
   Future<int> delete(int id) async {
@@ -73,7 +77,7 @@ class CategoryProvider {
     );
   }
 
-  Future<int> update(Category category) async {
+  Future<int> update(Subcategory category) async {
     return await db.update(
       tableName,
       category.toMap,
